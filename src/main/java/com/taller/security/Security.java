@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class Security{
 
     public String sha1Password(String planPass){
-        String sha1 = org.apache.commons.codec.digest.DigestUtils.sha1Hex( value );
+        String sha1 = org.apache.commons.codec.digest.DigestUtils.sha1Hex( planPass );
         return sha1;
     }
 
