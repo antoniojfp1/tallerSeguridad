@@ -1,14 +1,15 @@
 package com.taller.dao;
 
 import java.util.List;
+import java.util.Optional;
 
-import com.taller.entity.User;
+import com.taller.entity.UserEntity;
 
 public interface UserDao {
-	public List<User> findAll();
-	public User findById(long id);
-	public User create(User user);
-	public User update(User user, long id);
+	public List<UserEntity> findAll();
+	public Optional<UserEntity> findById(long id);
+	public UserEntity create(UserEntity user);
+	public UserEntity update(UserEntity user, long id);
 	public void delete(long id);
 	
 }

@@ -2,8 +2,8 @@ package com.taller.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.taller.entity.User;
+import com.taller.entity.UserEntity;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
 }
