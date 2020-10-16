@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.taller.entity.User;
+import com.taller.entity.UserEntity;
 import com.taller.repository.UserRepository;
 
 @RunWith(SpringRunner.class)
@@ -20,13 +20,12 @@ public class UserUnitTest {
 	
 	@Test
 	public void postUser() {
-		User user = new User();
+		UserEntity user = new UserEntity();
 		user.setId(1L);
 		user.setUsername("jcpenap");
 		user.setPassword("123456");
 		repository.save(user);
-		
-		User userSaved = repository.findById(1L).get();
+		UserEntity userSaved = repository.findById(1L).get();
 		assertNotNull(userSaved);
 	}
 }

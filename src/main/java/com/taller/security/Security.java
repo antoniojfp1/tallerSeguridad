@@ -1,29 +1,26 @@
 package com.taller.security;
 
-//TODO: revisar clases importadas que no se usan
-
-//Punto SHA-1
-import java.math.BigInteger;
-import java.security.MessageDigest;
-
 //Punto AES
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Base64;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 public class Security{
 
-    public String sha1Password(String planPass){
-        String sha1 = org.apache.commons.codec.digest.DigestUtils.sha1Hex( planPass );
-        return sha1;
+    public String sha1Password(String password) throws NoSuchAlgorithmException{
+    	MessageDigest md = MessageDigest.getInstance("SHA-1");
+    	md.update(password.getBytes());
+        byte[] digest = md.digest();
+        return DatatypeConverter.printHexBinary(digest).toUpperCase();
     }
 
     /**
@@ -33,12 +30,11 @@ public class Security{
      * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException 
      */
-    private SecretKeySpec crearClave(String clave) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-            
-        String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(clave); 
-
-        SecretKeySpec secretKey = new SecretKeySpec(md5, "AES");
- 
+    private SecretKeySpec crearClave(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    	MessageDigest md = MessageDigest.getInstance("SHA-1");
+    	md.update(password.getBytes());
+        byte[] digest = md.digest();
+        SecretKeySpec secretKey = new SecretKeySpec(digest, "AES");
         return secretKey;
     }
 
@@ -58,10 +54,8 @@ public class Security{
      */
     public String encriptar(String datos, String claveSecreta) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         SecretKeySpec secretKey = this.crearClave(claveSecreta);
-         
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");        
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
- 
         byte[] datosEncriptar = datos.getBytes("UTF-8");
         byte[] bytesEncriptados = cipher.doFinal(datosEncriptar);
         String encriptado = Base64.getEncoder().encodeToString(bytesEncriptados);
