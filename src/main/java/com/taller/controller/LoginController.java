@@ -1,27 +1,29 @@
 package com.taller.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.taller.model.User;
-import com.taller.security.JWTToken;
+import com.taller.service.UserService;
+import com.taller.util.CustomException;
+import com.taller.util.Response;
 
 @RestController
 public class LoginController {
-	
+
 	@Autowired
-	private JWTToken jwtToken;
-	
+	private UserService service;
+
 	@PostMapping("/login")
-	public User login(@RequestParam("user") String username, @RequestParam("password") String pwd) {
-		String token = jwtToken.generate(username);
-		User user = new User();
-		user.setUsername(username);
-		user.setToken(token);		
-		return user;
-		
+	public ResponseEntity<Response<Object>> login(@RequestParam("user") String username,
+			@RequestParam("password") String password) {
+		try {
+			return ResponseEntity.ok(new Response<>(service.autenticate(username, password), "Autenticado"));
+		} catch (CustomException e) {
+			return ResponseEntity.status(Integer.valueOf(e.getErrorCode())).body(new Response<>(null, e.getMessage()));
+		}
 	}
-	
+
 }

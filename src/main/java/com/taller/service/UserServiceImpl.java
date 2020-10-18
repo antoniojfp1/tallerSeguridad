@@ -4,11 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.taller.converter.UserConverter;
 import com.taller.dao.UserDao;
-import com.taller.model.User;
+import com.taller.dto.Login;
+import com.taller.dto.User;
+import com.taller.security.JWTToken;
+import com.taller.util.CustomException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -18,6 +22,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private UserConverter converter;
+	
+	@Autowired
+	private JWTToken jwtToken;
 
 	public UserDao getUserDao() {
 		return userDao;
@@ -37,10 +44,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User findById(long id) throws Exception{
+	public User findById(long id) throws CustomException{
 		return userDao.findById(id)
 				.map(entity -> converter.toModel(entity))
-				.orElseThrow(Exception::new);
+				.orElseThrow(() -> new CustomException("Usuario no encontrado",
+						String.valueOf(HttpStatus.PRECONDITION_FAILED.value())));
 	}
 
 	@Override
@@ -56,6 +64,19 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void delete(long id) {
 		userDao.delete(id);
+	}
+
+	@Override
+	public Login autenticate(String username, String password) throws CustomException {
+		return userDao.findByUsernameAndPassword(username, password).map(entity -> {
+				String token = jwtToken.generate(username);
+				Login login = new Login();
+				login.setUsername(entity.getUsername());
+				login.setToken(token);
+				return login;
+			}).orElseThrow(() -> new CustomException("Usuario no autenticado",
+					String.valueOf(HttpStatus.PRECONDITION_FAILED.value())));
+		
 	}
 	
 }

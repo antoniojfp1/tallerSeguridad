@@ -1,4 +1,4 @@
-package com.taller.model;
+package com.taller.dto;
 
 import java.beans.JavaBean;
 
@@ -10,7 +10,6 @@ public class User {
 	private String password;
 	private String name;
 	private String lastname;
-	private String token;
 	
 	public long getId() {
 		return id;
@@ -42,12 +41,5 @@ public class User {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
-	public String getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
-	
 	
 }

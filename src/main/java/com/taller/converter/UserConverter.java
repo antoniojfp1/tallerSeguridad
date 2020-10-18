@@ -2,8 +2,8 @@ package com.taller.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.taller.dto.User;
 import com.taller.entity.UserEntity;
-import com.taller.model.User;
 
 @Component
 public class UserConverter {

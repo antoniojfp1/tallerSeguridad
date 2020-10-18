@@ -11,5 +11,5 @@ public interface UserDao {
 	public UserEntity create(UserEntity user);
 	public UserEntity update(UserEntity user, long id);
 	public void delete(long id);
-	
+	public Optional<UserEntity> findByUsernameAndPassword(String username, String password);
 }
