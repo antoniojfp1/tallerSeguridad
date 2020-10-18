@@ -1,5 +1,6 @@
 package com.taller.service;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,17 +13,18 @@ import com.taller.dao.UserDao;
 import com.taller.dto.Login;
 import com.taller.dto.User;
 import com.taller.security.JWTToken;
+import com.taller.security.Security;
 import com.taller.util.CustomException;
 
 @Service
 public class UserServiceImpl implements UserService {
-	
+
 	@Autowired
 	private UserDao userDao;
-	
+
 	@Autowired
 	private UserConverter converter;
-	
+
 	@Autowired
 	private JWTToken jwtToken;
 
@@ -36,23 +38,19 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<User> findAll() {
-		 return userDao
-				 .findAll()
-				 .stream()
-				 .map(entity -> converter.toModel(entity))
-				 .collect(Collectors.toList());
+		return userDao.findAll().stream().map(entity -> converter.toModel(entity)).collect(Collectors.toList());
 	}
 
 	@Override
-	public User findById(long id) throws CustomException{
-		return userDao.findById(id)
-				.map(entity -> converter.toModel(entity))
+	public User findById(long id) throws CustomException {
+		return userDao.findById(id).map(entity -> converter.toModel(entity))
 				.orElseThrow(() -> new CustomException("Usuario no encontrado",
 						String.valueOf(HttpStatus.PRECONDITION_FAILED.value())));
 	}
 
 	@Override
-	public User create(User user) {
+	public User create(User user) throws CustomException {
+		user.setPassword(sha1Password(user.getPassword()));
 		return converter.toModel(userDao.create(converter.toEntity(user)));
 	}
 
@@ -68,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Login autenticate(String username, String password) throws CustomException {
-		return userDao.findByUsernameAndPassword(username, password).map(entity -> {
+		return userDao.findByUsernameAndPassword(username, sha1Password(password)).map(entity -> {
 				String token = jwtToken.generate(username);
 				Login login = new Login();
 				login.setUsername(entity.getUsername());
@@ -77,6 +75,15 @@ public class UserServiceImpl implements UserService {
 			}).orElseThrow(() -> new CustomException("Usuario no autenticado",
 					String.valueOf(HttpStatus.PRECONDITION_FAILED.value())));
 		
+	}
+
+	private String sha1Password(String plainPassword) throws CustomException {
+		try {
+			return new Security().sha1Password(plainPassword);
+		} catch (NoSuchAlgorithmException e) {
+			throw new CustomException("Password invalida", 
+				String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
+		}
 	}
 	
 }
