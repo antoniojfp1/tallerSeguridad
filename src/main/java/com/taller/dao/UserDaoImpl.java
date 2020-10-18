@@ -44,6 +44,11 @@ public class UserDaoImpl implements UserDao {
 	public void delete(long id) {
 		repository.deleteById(id);
 	}
+
+	@Override
+	public Optional<UserEntity> findByUsernameAndPassword(String username, String password) {
+		return repository.findByUsernameAndPassword(username, password);
+	}
 	
 	
 
