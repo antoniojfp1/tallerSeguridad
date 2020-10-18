@@ -67,6 +67,12 @@
 		    <artifactId>jjwt</artifactId>
 		    <version>0.6.0</version>
 		</dependency>
+		<!-- Allow for automatic restarts when classpath contents change. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<build>
