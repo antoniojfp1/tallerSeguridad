@@ -23,20 +23,19 @@ public class FileController {
     @PostMapping(value = "/encrypt")
 	public ResponseEntity<Resource> encryptFile(@RequestParam("file") MultipartFile file, 
 												@RequestParam("password") String password) throws CustomException {
-		MultipartFile encryptedFile = fileService.encryptFile(file, password);
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getOriginalFilename() + "\"")
-				.body(encryptedFile.getResource());
+		return fileDownload(fileService.encryptFile(file, password));
 	}
-
 
 	@PostMapping(value = "/decrypt")
 	public ResponseEntity<Resource> decryptFile(@RequestParam("file") MultipartFile file, 
 												@RequestParam("password") String password) throws CustomException {
-		MultipartFile decryptedFile = fileService.decryptFile(file, password);
+		return fileDownload(fileService.decryptFile(file, password));
+	}
+
+	private ResponseEntity<Resource> fileDownload(MultipartFile file) {
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getOriginalFilename() + "\"")
-				.body(decryptedFile.getResource());
+				.body(file.getResource());
 	}
 
 }
