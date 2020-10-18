@@ -1,5 +1,6 @@
 package com.taller.service;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import com.taller.dao.UserDao;
 import com.taller.dto.Login;
 import com.taller.dto.User;
 import com.taller.security.JWTToken;
+import com.taller.security.Security;
 import com.taller.util.CustomException;
 
 @Service
@@ -25,6 +27,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private JWTToken jwtToken;
+	
+	@Autowired
+	private Security security;
 
 	public UserDao getUserDao() {
 		return userDao;
@@ -52,8 +57,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User create(User user) {
-		return converter.toModel(userDao.create(converter.toEntity(user)));
+	public User create(User user) throws CustomException {
+		try {
+			user.setPassword(security.sha1Password(user.getPassword()));
+			return converter.toModel(userDao.create(converter.toEntity(user)));
+		} catch (NoSuchAlgorithmException e) {
+			throw new CustomException("Error al crear el usuario",
+					String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+		}
 	}
 
 	@Override
@@ -68,15 +79,21 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Login autenticate(String username, String password) throws CustomException {
-		return userDao.findByUsernameAndPassword(username, password).map(entity -> {
-				String token = jwtToken.generate(username);
-				Login login = new Login();
-				login.setUsername(entity.getUsername());
-				login.setToken(token);
-				return login;
-			}).orElseThrow(() -> new CustomException("Usuario no autenticado",
-					String.valueOf(HttpStatus.PRECONDITION_FAILED.value())));
-		
+		try {
+			return userDao.findByUsernameAndPassword(username, security.sha1Password(password)).map(entity -> {
+					String token = jwtToken.generate(username);
+					Login login = new Login();
+					login.setUsername(entity.getUsername());
+					login.setToken(token);
+					return login;
+				}).orElseThrow(CustomException::new);
+		} catch (NoSuchAlgorithmException e) {
+			throw new CustomException("Error al intentar autenticar el usuario",
+					String.valueOf(HttpStatus.PRECONDITION_FAILED.value())); 
+		} catch (CustomException e) {
+			throw new CustomException("Usuario no autenticado",
+					String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
+		}
 	}
 	
 }
