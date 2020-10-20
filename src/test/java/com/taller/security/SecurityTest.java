@@ -2,8 +2,10 @@ package com.taller.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +23,6 @@ public class SecurityTest {
 
     @Autowired
     private Security security;
-    
 
     @Test
     public void encrypt() throws Exception {
@@ -36,5 +37,36 @@ public class SecurityTest {
         assertEquals(PLAIN_TEXT, new String(decryptedBytes));
     }
 
+    @Test
+    public void genKeyPairWithNoError() throws Exception {
+        KeyPair keyPair = security.genKeyPair();
+        assertNotNull(keyPair.getPrivate());
+        assertNotNull(keyPair.getPublic());
+    }
+
+    @Test
+    public void generateMD5Hash() throws Exception {
+        KeyPair keyPair = security.genKeyPair();
+        
+        final String md5Hash = security.generateMD5Hash(PLAIN_BYTES);
+        
+        final byte[] encryptedBytes = security.asymetricEncrypt(PLAIN_BYTES, keyPair.getPublic().getEncoded());
+        final byte[] decryptedBytes = security.asymetricDecrypt(encryptedBytes, keyPair.getPrivate().getEncoded());
+
+        assertEquals(md5Hash, security.generateMD5Hash(decryptedBytes));
+
+    }
+
+    @Test
+    public void asymetricEncryptionDecryption() throws Exception {
+        
+        KeyPair keyPair = security.genKeyPair();
+
+        final byte[] encryptedBytes = security.asymetricEncrypt(PLAIN_BYTES, keyPair.getPublic().getEncoded());
+        final byte[] decryptedBytes = security.asymetricDecrypt(encryptedBytes, keyPair.getPrivate().getEncoded());
+
+        assertNotNull(decryptedBytes);
+        assertEquals(PLAIN_TEXT, new String(decryptedBytes));
+    }
 
 }
