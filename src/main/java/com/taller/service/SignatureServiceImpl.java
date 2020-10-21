@@ -34,8 +34,7 @@ public class SignatureServiceImpl implements SignatureService {
             ByteFile publicKey = new ByteFile(keyPair.getPublic().getEncoded(), "key.pub");
             ByteFile privateKey = new ByteFile(keyPair.getPrivate().getEncoded(), "key.pri");
             return new Keys(publicKey, privateKey);
-        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-                | BadPaddingException e) {
+        } catch (NoSuchAlgorithmException e) {
             throw new CustomException("Llaves no pudieron ser creadas",
                     String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
         }

@@ -115,7 +115,7 @@ public class Security {
 
     //Genera el par de llaves
 
-    public KeyPair genAsymetricKeyPair() throws NoSuchAlgorithmException,NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException  {
+    public KeyPair genAsymetricKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         return kpg.genKeyPair();
