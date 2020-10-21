@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class SecurityTest {
 
     private static final String PASSWORD = "12345";
-    private static final String PLAIN_TEXT = "the quick brown fox";
+    private static final String PLAIN_TEXT = "the quick brown fox jumps over the lazy dog";
     private static final byte[] PLAIN_BYTES = PLAIN_TEXT.getBytes(StandardCharsets.UTF_8);
 
     @Autowired
