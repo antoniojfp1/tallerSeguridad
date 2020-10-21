@@ -31,7 +31,7 @@ public class FileController {
 	@PostMapping(value = "/decrypt")
 	public ResponseEntity<Response<Object>> decryptFile(@RequestParam("file") MultipartFile file, @RequestParam("password") String password) {
 		try {
-			return ResponseEntity.ok(new Response<>(fileService.decryptFile(file, password), "Encriptado"));
+			return ResponseEntity.ok(new Response<>(fileService.decryptFile(file, password), "Desencriptado"));
 		} catch (CustomException e) {
 			return ResponseEntity.status(Integer.valueOf(e.getErrorCode())).body(new Response<>(null, e.getMessage()));
 		}

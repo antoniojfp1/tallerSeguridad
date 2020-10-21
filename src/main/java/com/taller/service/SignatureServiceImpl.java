@@ -1,8 +1,10 @@
 package com.taller.service;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -28,13 +30,13 @@ public class SignatureServiceImpl implements SignatureService {
     @Override
     public Keys generateKeys() throws CustomException {
         try {
-            KeyPair keyPair = security.genKeyPair();
+            KeyPair keyPair = security.genAsymetricKeyPair();
             ByteFile publicKey = new ByteFile(keyPair.getPublic().getEncoded(), "key.pub");
             ByteFile privateKey = new ByteFile(keyPair.getPrivate().getEncoded(), "key.pri");
             return new Keys(publicKey, privateKey);
-        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException| BadPaddingException e) {
-            throw new CustomException("Llaves no pudieron ser creadas", 
-                String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new CustomException("Llaves no pudieron ser creadas",
+                    String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
         }
     }
 
@@ -44,21 +46,33 @@ public class SignatureServiceImpl implements SignatureService {
             byte[] data = file.getBytes();
             byte[] encryptedBytes = security.asymetricEncrypt(file.getBytes(), publicKey.getBytes());
             return new ByteHashedFile(encryptedBytes, file.getOriginalFilename(), security.generateMD5Hash(data));
-        } catch (Exception e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+        | BadPaddingException | InvalidKeySpecException | IOException e) {
             throw new CustomException("Archivo no pudo ser encriptado",
-                    String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
-        }
+                String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
+}
     }
 
     @Override
-    public ByteHashedFile decrypt(MultipartFile file, MultipartFile privateKey) throws CustomException {
+    public ByteFile decrypt(MultipartFile file, MultipartFile privateKey, String md5Hash) throws CustomException {
+
         try {
             byte[] decryptedBytes = security.asymetricDecrypt(file.getBytes(), privateKey.getBytes());
-            return new ByteHashedFile(decryptedBytes, file.getOriginalFilename(), security.generateMD5Hash(decryptedBytes));
-        } catch (Exception e) {
-            throw new CustomException("Archivo no pudo ser desencriptado",
+            String newHash = security.generateMD5Hash(decryptedBytes);
+            
+            if (!newHash.equals(md5Hash)) {
+                throw new CustomException("No se pudo validar la integridad del archivo",
                     String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
+            }
+
+            return new ByteFile(decryptedBytes, file.getOriginalFilename());
+
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+                | BadPaddingException | InvalidKeySpecException | IOException e) {
+            throw new CustomException("Archivo no pudo ser desencriptado",
+                String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
         }
+    
     }
     
 }
