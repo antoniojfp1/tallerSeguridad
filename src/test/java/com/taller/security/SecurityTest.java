@@ -39,14 +39,14 @@ public class SecurityTest {
 
     @Test
     public void genKeyPairWithNoError() throws Exception {
-        KeyPair keyPair = security.genKeyPair();
+        KeyPair keyPair = security.genAsymetricKeyPair();
         assertNotNull(keyPair.getPrivate());
         assertNotNull(keyPair.getPublic());
     }
 
     @Test
     public void generateMD5Hash() throws Exception {
-        KeyPair keyPair = security.genKeyPair();
+        KeyPair keyPair = security.genAsymetricKeyPair();
         
         final String md5Hash = security.generateMD5Hash(PLAIN_BYTES);
         
@@ -60,7 +60,7 @@ public class SecurityTest {
     @Test
     public void asymetricEncryptionDecryption() throws Exception {
         
-        KeyPair keyPair = security.genKeyPair();
+        KeyPair keyPair = security.genAsymetricKeyPair();
 
         final byte[] encryptedBytes = security.asymetricEncrypt(PLAIN_BYTES, keyPair.getPublic().getEncoded());
         final byte[] decryptedBytes = security.asymetricDecrypt(encryptedBytes, keyPair.getPrivate().getEncoded());

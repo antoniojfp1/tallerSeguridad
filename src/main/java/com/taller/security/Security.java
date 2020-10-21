@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Component;
 public class Security {
 
     static {
-        java.security.Security.insertProviderAt(new BouncyCastleProvider(), 0);
+        java.security.Security.insertProviderAt(new BouncyCastleProvider(), 1);
     }
 
     private final static int GCM_IV_LENGTH = 12;
@@ -63,6 +64,19 @@ public class Security {
         return secretKey;
     }
 
+    private byte[] doFinalSymetric(byte[] data, String password, int opMode)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+
+        SecretKeySpec secretKey = this.crearClave(password);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        
+        GCMParameterSpec ivSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
+        cipher.init(opMode, secretKey, ivSpec);
+        
+        return cipher.doFinal(data);
+    }
+
     /**
      * Aplica la encriptacion AES a la cadena de texto usando la clave indicada
      * 
@@ -80,13 +94,7 @@ public class Security {
     public byte[] encriptar(byte[] utf8Data, String claveSecreta) throws UnsupportedEncodingException,
             NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
             BadPaddingException, InvalidAlgorithmParameterException {
-        SecretKeySpec secretKey = this.crearClave(claveSecreta);
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        
-        GCMParameterSpec ivSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
-        
-        return cipher.doFinal(utf8Data);
+        return doFinalSymetric(utf8Data, claveSecreta, Cipher.ENCRYPT_MODE);
     }
  
     /**
@@ -103,44 +111,37 @@ public class Security {
      * @throws NoSuchProviderException
      */
     public byte[] desencriptar(byte[] encryptedData, String claveSecreta) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-        SecretKeySpec secretKey = this.crearClave(claveSecreta);
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-
-        GCMParameterSpec ivSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
-
-        byte[] bytesEncriptados = encryptedData;
-        return cipher.doFinal(bytesEncriptados);
+        return doFinalSymetric(encryptedData, claveSecreta, Cipher.DECRYPT_MODE);
     }
 
     //Encripcion Asimetrica
 
     //Genera el par de llaves
 
-    public KeyPair genKeyPair() throws NoSuchAlgorithmException,NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException  {
+    public KeyPair genAsymetricKeyPair() throws NoSuchAlgorithmException,NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException  {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
         return kpg.genKeyPair();
     }
 
+    private byte[] doFinalAsymetric(byte[] data, Key key, int opMode)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
+            BadPaddingException {
+        Cipher cipher = Cipher.getInstance("RSA/None/OAEPWithSHA-1AndMGF1Padding");
+        cipher.init(opMode, key);
+        return cipher.doFinal(data);
+    }
+
     //Encriptar
     public byte[] asymetricEncrypt(byte[] data, byte[] rawPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, UnsupportedEncodingException {
         PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(rawPublicKey));
-
-        Cipher cipher = Cipher.getInstance("RSA/None/OAEPWithSHA-1AndMGF1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-
-        return cipher.doFinal(data);
+        return doFinalAsymetric(data, publicKey, Cipher.ENCRYPT_MODE);
     }
 
     //Desencriptar
     public byte[] asymetricDecrypt(byte[] data, byte[] rawPrivateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
         PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(rawPrivateKey));
-
-        Cipher cipher = Cipher.getInstance("RSA/None/OAEPWithSHA-1AndMGF1Padding");
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-
-        return cipher.doFinal(data);
+        return doFinalAsymetric(data, privateKey, Cipher.DECRYPT_MODE);
     }
 
     public String generateMD5Hash(byte[] data) throws NoSuchAlgorithmException {

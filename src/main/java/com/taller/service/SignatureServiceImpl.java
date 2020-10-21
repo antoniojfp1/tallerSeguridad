@@ -28,7 +28,7 @@ public class SignatureServiceImpl implements SignatureService {
     @Override
     public Keys generateKeys() throws CustomException {
         try {
-            KeyPair keyPair = security.genKeyPair();
+            KeyPair keyPair = security.genAsymetricKeyPair();
             ByteFile publicKey = new ByteFile(keyPair.getPublic().getEncoded(), "key.pub");
             ByteFile privateKey = new ByteFile(keyPair.getPrivate().getEncoded(), "key.pri");
             return new Keys(publicKey, privateKey);
