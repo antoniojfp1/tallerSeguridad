@@ -35,9 +35,9 @@ public class Security {
         java.security.Security.insertProviderAt(new BouncyCastleProvider(), 1);
     }
 
-    private final static int GCM_IV_LENGTH = 12;
-    private final static int GCM_TAG_LENGTH = 16;
-    private final static byte[] iv = new byte[GCM_IV_LENGTH];
+    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_LENGTH = 16;
+    private static final byte[] IV = new byte[GCM_IV_LENGTH];
 
     public String sha1Password(String password) throws NoSuchAlgorithmException {
     	MessageDigest md = MessageDigest.getInstance("SHA-1");
@@ -51,12 +51,10 @@ public class Security {
      * 
      * @param clave Clave que se usara para encriptar
      * @return Clave de encriptacion
-     * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
-     * @throws NoSuchProviderException
      */
     private SecretKeySpec crearClave(String password)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException {
     	MessageDigest md = MessageDigest.getInstance("SHA-256");
     	md.update(password.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
@@ -64,14 +62,14 @@ public class Security {
         return secretKey;
     }
 
-    private byte[] doFinalSymetric(byte[] data, String password, int opMode)
-            throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-            InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    private byte[] doFinalSymetric(byte[] data, String password, int opMode) throws NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException {
 
         SecretKeySpec secretKey = this.crearClave(password);
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         
-        GCMParameterSpec ivSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, iv);
+        GCMParameterSpec ivSpec = new GCMParameterSpec(GCM_TAG_LENGTH * Byte.SIZE, IV);
         cipher.init(opMode, secretKey, ivSpec);
         
         return cipher.doFinal(data);
@@ -83,17 +81,16 @@ public class Security {
      * @param datos        Cadena a encriptar
      * @param claveSecreta Clave para encriptar
      * @return Información encriptada
-     * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      * @throws NoSuchPaddingException
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException
-     * @throws NoSuchProviderException
+     * @throws InvalidAlgorithmParameterException
      */
-    public byte[] encriptar(byte[] utf8Data, String claveSecreta) throws UnsupportedEncodingException,
-            NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-            BadPaddingException, InvalidAlgorithmParameterException {
+    public byte[] encriptar(byte[] utf8Data, String claveSecreta) throws NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException {
         return doFinalSymetric(utf8Data, claveSecreta, Cipher.ENCRYPT_MODE);
     }
  
@@ -102,15 +99,16 @@ public class Security {
      * @param datosEncriptados Datos encriptados
      * @param claveSecreta Clave de encriptacion
      * @return Informacion desencriptada
-     * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      * @throws NoSuchPaddingException
      * @throws IllegalBlockSizeException
      * @throws BadPaddingException 
-     * @throws NoSuchProviderException
+     * @throws InvalidAlgorithmParameterException
      */
-    public byte[] desencriptar(byte[] encryptedData, String claveSecreta) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+    public byte[] desencriptar(byte[] encryptedData, String claveSecreta) throws NoSuchAlgorithmException,
+            NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException,
+            BadPaddingException {
         return doFinalSymetric(encryptedData, claveSecreta, Cipher.DECRYPT_MODE);
     }
 
