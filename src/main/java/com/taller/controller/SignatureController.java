@@ -39,9 +39,9 @@ public class SignatureController {
 	}
 
 	@PostMapping(value = "/decryptWithKey")
-	public ResponseEntity<Response<Object>> decryptWithKey(@RequestParam("file") MultipartFile file, @RequestParam("privateKey") MultipartFile privateKey) throws CustomException {
+	public ResponseEntity<Response<Object>> decryptWithKey(@RequestParam("file") MultipartFile file, @RequestParam("privateKey") MultipartFile privateKey, @RequestParam("md5Hash") String md5Hash) throws CustomException {
         try {
-			return ResponseEntity.ok(new Response<>(signatureService.decrypt(file, privateKey), "Desencriptado"));
+			return ResponseEntity.ok(new Response<>(signatureService.decrypt(file, privateKey, md5Hash), "Desencriptado"));
 		} catch (CustomException e) {
 			return ResponseEntity.status(Integer.valueOf(e.getErrorCode())).body(new Response<>(null, e.getMessage()));
 		}
