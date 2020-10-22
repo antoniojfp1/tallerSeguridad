@@ -2,6 +2,9 @@ package com.taller.util;
 
 import java.util.regex.*;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ValidatePattern {
     
     public boolean isValid(String pass){
