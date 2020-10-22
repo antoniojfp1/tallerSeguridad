@@ -1,13 +1,13 @@
 package com.taller.service;
 
-import com.taller.dto.ByteFile;
-import com.taller.util.CustomException;
-
 import org.springframework.web.multipart.MultipartFile;
+
+import com.taller.dto.File;
+import com.taller.util.CustomException;
 
 public interface FileService {
     
-    public ByteFile encryptFile(MultipartFile file, String password) throws CustomException;
-    public ByteFile decryptFile(MultipartFile file, String password) throws CustomException;
+    public File encryptFile(MultipartFile file, String password) throws CustomException;
+    public File decryptFile(MultipartFile file, String password) throws CustomException;
 
 }
