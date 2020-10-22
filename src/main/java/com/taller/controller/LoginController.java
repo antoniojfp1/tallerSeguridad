@@ -17,7 +17,7 @@ public class LoginController {
 	private UserService service;
 
 	@PostMapping("/login")
-	public ResponseEntity<Response<Object>> login(@RequestParam("user") String username,
+	public ResponseEntity<Response<Object>> login(@RequestParam("username") String username,
 			@RequestParam("password") String password) {
 		try {
 			return ResponseEntity.ok(new Response<>(service.autenticate(username, password), "Autenticado"));
