@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -12,6 +13,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import com.taller.dto.ByteFile;
 import com.taller.dto.ByteHashedFile;
+import com.taller.dto.File;
 import com.taller.dto.Keys;
 import com.taller.security.Security;
 import com.taller.util.CustomException;
@@ -33,7 +35,14 @@ public class SignatureServiceImpl implements SignatureService {
             KeyPair keyPair = security.genAsymetricKeyPair();
             ByteFile publicKey = new ByteFile(keyPair.getPublic().getEncoded(), "key.pub");
             ByteFile privateKey = new ByteFile(keyPair.getPrivate().getEncoded(), "key.pri");
-            return new Keys(publicKey, privateKey);
+            
+            File publiK = new File();
+            publiK.setContent(Base64.getEncoder().encodeToString(publicKey.getContent()));
+            
+            File privateK = new File();
+            privateK.setContent(Base64.getEncoder().encodeToString(privateKey.getContent()));
+            
+            return new Keys(publiK, privateK);
         } catch (NoSuchAlgorithmException e) {
             throw new CustomException("Llaves no pudieron ser creadas",
                     String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));

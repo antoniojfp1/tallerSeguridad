@@ -2,19 +2,19 @@ package com.taller.dto;
 
 public class Keys {
 
-    private final ByteFile publicKey;
-    private final ByteFile privateKey;
+    private final File publicKey;
+    private final File privateKey;
 
-    public Keys(ByteFile publicKey, ByteFile privateKey) {
+    public Keys(File publicKey, File privateKey) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
     }
 
-    public ByteFile getPublicKey() {
+    public File getPublicKey() {
         return publicKey;
     }
 
-    public ByteFile getPrivateKey() {
+    public File getPrivateKey() {
         return privateKey;
     }
     
