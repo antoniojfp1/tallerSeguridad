@@ -12,11 +12,14 @@ import com.taller.dto.User;
 import com.taller.service.UserService;
 import com.taller.util.CustomException;
 import com.taller.util.Response;
+import com.taller.util.ValidatePattern;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 	
+	private ValidatePattern validatePattern = new ValidatePattern();
+
 	@Autowired
 	private UserService service;
 	
@@ -43,6 +46,9 @@ public class UserController {
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public ResponseEntity<Response<Object>> create(@RequestBody User user) {
 		try {
+			if(!validatePattern.isValid(user.getPassword())){
+				return ResponseEntity.status(200).body(new Response<>(null,"Password Invalido"));	
+			}
 			return ResponseEntity.ok(new Response<>(service.create(user), "Creado"));
 		} catch (CustomException e) {
 			return ResponseEntity.status(Integer.valueOf(e.getErrorCode()))
@@ -53,6 +59,9 @@ public class UserController {
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Object> update(@RequestBody User user, @PathVariable long id) {
 		try {
+			if(!validatePattern.isValid(user.getPassword())){
+				return ResponseEntity.status(200).body(new Response<>(null,"Password Invalido"));	
+			}
 			return ResponseEntity.ok(new Response<>(service.update(user, id), "Actualizado"));
 		} catch (CustomException e) {
 			return ResponseEntity.status(Integer.valueOf(e.getErrorCode()))
