@@ -59,7 +59,10 @@ public class SignatureServiceImpl implements SignatureService {
         | BadPaddingException | InvalidKeySpecException | IOException e) {
             throw new CustomException("Archivo no pudo ser encriptado",
                 String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
-}
+        } catch(Exception e) {
+        	throw new CustomException("Error al procesar el archivo",
+                    String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
     }
 
     @Override
