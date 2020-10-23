@@ -9,5 +9,6 @@ import com.taller.entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	
 	public Optional<UserEntity> findByUsernameAndPassword(String username, String password);
+	public Optional<UserEntity> findByUsername(String username);
 
 }

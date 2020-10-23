@@ -59,8 +59,12 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User create(User user) throws CustomException {
 		try {
-			user.setPassword(security.sha1Password(user.getPassword()));
-			return converter.toModel(userDao.create(converter.toEntity(user)));
+			if(!userDao.findByUsername(user.getUsername()).isPresent()) {
+				user.setPassword(security.sha1Password(user.getPassword()));
+				return converter.toModel(userDao.create(converter.toEntity(user)));
+			}
+			throw new CustomException("El usuario ya se encuentra registrado",
+					String.valueOf(HttpStatus.PRECONDITION_FAILED.value())); 
 		} catch (NoSuchAlgorithmException e) {
 			throw new CustomException("Error al crear el usuario",
 					String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
@@ -91,7 +95,7 @@ public class UserServiceImpl implements UserService {
 			throw new CustomException("Error al intentar autenticar el usuario",
 					String.valueOf(HttpStatus.PRECONDITION_FAILED.value())); 
 		} catch (CustomException e) {
-			throw new CustomException("Usuario no autenticado",
+			throw new CustomException("El usuario o la contraseña es inválida",
 					String.valueOf(HttpStatus.PRECONDITION_FAILED.value()));
 		}
 	}
