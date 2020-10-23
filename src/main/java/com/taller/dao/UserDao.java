@@ -12,4 +12,5 @@ public interface UserDao {
 	public UserEntity update(UserEntity user, long id);
 	public void delete(long id);
 	public Optional<UserEntity> findByUsernameAndPassword(String username, String password);
+	public Optional<UserEntity> findByUsername(String username);
 }
